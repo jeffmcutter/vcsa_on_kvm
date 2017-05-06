@@ -19,5 +19,5 @@ For setting up ESXi 6.5 under KVM, the following settings may help on your host,
 options kvm ignore_msrs=1
 options kvm-intel nested=y ept=y
 
-Also when setting up the ESX VM in KVM, choose "Copy host CPU configuration" under CPU and e1000 may be your best choice for NIC model.  ESXi 6.5 seems to require a minimum of 4 GB to run, or at least to install.
+Also when setting up the ESX VM in KVM, choose "Copy host CPU configuration" under CPU and e1000 may be your best choice for NIC model.  ESXi 6.5 seems to require a minimum of 4 GB to run, or at least to install.  I'm using an IDE drive with it.
 
