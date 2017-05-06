@@ -24,9 +24,12 @@
   - libvirt:
      name: 'vcenter65'
      pool: 'default'
-     # Network or bridge.  See bottom of file.
-     network: 'default'
-     bridge: 'br0'
+     # Use network named network_name
+     network_type: 'network'
+     network_name: 'default'
+     # Use bridge named network_name
+     #network_type: 'bridge'
+     #network_name: 'br0'
   - disks:
      disk1: 12288
      disk2: 1843
@@ -92,8 +95,5 @@
     shell: virsh -c qemu:///system  vol-upload --pool {{libvirt.pool}} {{libvirt.name}}-disk3.qcow2 /tmp/{{libvirt.name}}-disk3.qcow2
     tags: libvirt
   - name: Create the VCSA VM
-    # Using network to select network.
-    shell: virt-install --connect qemu:///system -n {{libvirt.name}} --ram 10240 --vcpus 4 --cpu host-passthrough --import --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk1.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk2.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk3.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk4.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk5.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk6.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk7.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk8.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk9.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk10.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk11.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk12.qcow2,bus=sata  --os-variant sles11 --network model=e1000,network={{libvirt.network}} --wait 0
-    # Using bridge to select network.
-    #shell: virt-install --connect qemu:///system -n {{libvirt.name}} --ram 10240 --vcpus 4 --cpu host-passthrough --import --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk1.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk2.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk3.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk4.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk5.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk6.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk7.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk8.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk9.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk10.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk11.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk12.qcow2,bus=sata  --os-variant sles11 --network model=e1000,bridge={{libvirt.bridge}} --wait 0
+    shell: virt-install --connect qemu:///system -n {{libvirt.name}} --ram 10240 --vcpus 4 --cpu host-passthrough --import --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk1.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk2.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk3.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk4.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk5.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk6.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk7.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk8.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk9.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk10.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk11.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk12.qcow2,bus=sata  --os-variant sles11 --network model=e1000,{{libvirt.network_type}}={{libvirt.network_name}} --wait 0
     tags: libvirt
