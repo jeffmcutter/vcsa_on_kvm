@@ -1,11 +1,13 @@
 # vcsa_on_kvm
-VMware-vCenter-Server-Appliance 6.5 on KVM Install / Ansible Playbook
+VMware-vCenter-Server-Appliance 6.7 on KVM Install / Ansible Playbook
 
 I found most of this at the link below and adapted it in a quick and dirty manner for the sole purpose of getting VCSA running under KVM as quickly as I could.
 
 https://gist.github.com/infernix/0377af0bc9012e3d5e5e
 
 Original link handled 6.0, so some changes for 6.5 were necessary: an extra disk, different sizes, more RAM, and a different post install mechanism, which I ended up just avoiding from an automation perspective because it seems to have totally changed from 6.0 to 6.5.  Once the appliance installs, you can configure it on the console initially, then via the vcsa administrator web interface on port 5480 by default.
+
+I have since updated to use 6.7 borrowing some efforts from Dr-Shadow's fork.
 
 Note that it can take a while for the appliance to come up to the blue screen where you can do the initial configuration.  After it comes up, it may still be installing packages.  If you configure the management network and disable IPv6, it will reboot the host potentially halting the install in the background.  If this happens the Administrator UI will say installing RPMs indefinitely.
 
