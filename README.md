@@ -18,10 +18,23 @@ Note also that valid reverse DNS is supposed to be important when configuring th
 For setting up ESXi 6.5 under KVM, the following settings may help on your host, probably want to reboot after:
 
 ```
-# cat /etc/modprobe.d/kvm-intel.conf 
+# cat /etc/modprobe.d/kvm-intel.conf
 options kvm ignore_msrs=1
 options kvm-intel nested=y ept=y
 ```
 
 Also when setting up the ESX VM in KVM, choose "Copy host CPU configuration" under CPU and e1000 may be your best choice for NIC model.  ESXi 6.5 seems to require a minimum of 4 GB to run, or at least to install.  I'm using an IDE drive with it.
 
+UPDATE:
+
+January 10, 2024
+
+Updated for VCSA 8.0 U2.
+
+Using SATA disks for ESXi now.
+
+Using e1000e for all nics now.
+
+Sort of cleaned it up just ever so slightly.  At least it's a touch easier to read now.
+
+Failed firstboot install with 16 GB RAM.  Switched to 24 GB and it worked.  Thinking 20 GB might be enough.
