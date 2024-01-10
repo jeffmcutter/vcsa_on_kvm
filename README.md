@@ -1,5 +1,5 @@
 # vcsa_on_kvm
-VMware-vCenter-Server-Appliance 6.7 on KVM Install / Ansible Playbook
+VMware-vCenter-Server-Appliance 8.0 U2 on KVM Install / Ansible Playbook
 
 I found most of this at the link below and adapted it in a quick and dirty manner for the sole purpose of getting VCSA running under KVM as quickly as I could.
 
