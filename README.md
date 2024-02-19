@@ -38,3 +38,5 @@ Using e1000e for all nics now.
 Sort of cleaned it up just ever so slightly.  At least it's a touch easier to read now.
 
 Failed firstboot install with 16 GB RAM.  Switched to 24 GB and it worked.  Thinking 20 GB might be enough.
+
+I was not able to get the vCLS VM to run nested.  I disabled it following https://kb.vmware.com/s/article/91890.
