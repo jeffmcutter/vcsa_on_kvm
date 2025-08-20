@@ -1,37 +1,37 @@
 ---
 - name: Generate a KVM enabled VMWare VCSA VM under libvirt
-  #hosts: somehost
+  # hosts: somehost
   hosts: localhost
-  connection: local #comment if remote host.
+  connection: local # comment if remote host.
   become: true
   vars:
-  - reqpkgs_apt:
-    - bsdtar
-    - qemu-utils
-    - virtinst
-  - reqpkgs_yum:
-    - bsdtar
-    - qemu-img
-    - virt-install
-  - reqpkgs_dnf:
-    - bsdtar
-    - qemu-img
-    - virt-install
-    - python3-libselinux
-  - vcsaiso: 'VMware-VCSA-all-8.0.2-22617221.iso'
-  - vcsapath: '/home/jcutter/media/'
-  - vcsaprefix: 'VMware-vCenter-Server-Appliance-8.0.2.00100-22617221_OVF10'
-  - libvirt:
-     name: 'vcenter01'
-     pool: 'default'
-     # Use network named network_name
-     network_type: 'network'
-     network_name: 'alternate'
-     # Use bridge named network_name
-     #network_type: 'bridge'
-     #network_name: 'br0'
-  - macaddr: '52:54:00:00:00:01'
-  - disks:
+    reqpkgs_apt:
+      - bsdtar
+      - qemu-utils
+      - virtinst
+    reqpkgs_yum:
+      - bsdtar
+      - qemu-img
+      - virt-install
+    reqpkgs_dnf:
+      - bsdtar
+      - qemu-img
+      - virt-install
+      - python3-libselinux
+    vcsaiso: "VMware-VCSA-all-8.0.2-22617221.iso"
+    vcsapath: "/home/jcutter/media/"
+    vcsaprefix: "VMware-vCenter-Server-Appliance-8.0.2.00100-22617221_OVF10"
+    libvirt:
+      name: "vcenter01"
+      pool: "default"
+      # Use network named network_name
+      network_type: "network"
+      network_name: "alternate"
+      # Use bridge named network_name
+      # network_type: 'bridge'
+      # network_name: 'br0'
+    macaddr: "52:54:00:00:00:01"
+    disks:
       disk1: 49728
       disk2: 7040
       disk3: 25600
@@ -50,68 +50,102 @@
       disk16: 102400
       disk17: 153600
   tasks:
-  - name: Ensure required packages are installed (Debian)
-    apt: pkg={{item}} state=present
-    with_items: '{{ reqpkgs_apt }}'
-    when: ansible_pkg_mgr == "apt"
+    - name: Ensure required packages are installed (Debian)
+      ansible.builtin.apt:
+        pkg: "{{ item }}"
+        state: present
+      with_items: "{{ reqpkgs_apt }}"
+      when: ansible_pkg_mgr == "apt"
 
-  - name: Ensure required packages are installed (CentOS)
-    yum: pkg={{item}} state=present
-    with_items: '{{ reqpkgs_yum }}'
-    when: ansible_pkg_mgr == "yum"
+    - name: Ensure required packages are installed (CentOS)
+      ansible.builtin.dnf:
+        pkg: "{{ item }}"
+        state: present
+      with_items: "{{ reqpkgs_yum }}"
+      when: ansible_pkg_mgr == "yum"
 
-  - name: Ensure required packages are installed (Fedora)
-    package:
-      name: "{{ reqpkgs_dnf }}"
-      state: present
-    when: ansible_pkg_mgr == "dnf"
+    - name: Ensure required packages are installed (Fedora)
+      ansible.builtin.package:
+        name: "{{ reqpkgs_dnf }}"
+        state: present
+      when: "'dnf' in ansible_pkg_mgr"
 
-  - name: Extract iso to stdout and untar ova directly into /tmp
-    shell: bsdtar -xvOf {{ vcsapath }}{{ vcsaiso }} vcsa/{{ vcsaprefix }}.ova | tar xv -C /tmp/ -xvf -
+    - name: Extract iso to stdout and untar ova directly into /tmp
+      ansible.builtin.shell:
+        cmd: >-
+          set -o pipefail;
+          bsdtar -xvOf {{ vcsapath }}{{ vcsaiso }} vcsa/{{ vcsaprefix }}.ova |
+          tar xv -C /tmp/ -xvf -
+      changed_when: true
 
-  - name: Convert {{ vcsaprefix }}-disk1.vmdk to {{libvirt.name}}-disk1.qcow2
-    shell: qemu-img convert -O qcow2 /tmp/{{vcsaprefix}}-disk1.vmdk /tmp/{{libvirt.name}}-disk1.qcow2
+    - name: Convert {{ vcsaprefix }}-disk1.vmdk to {{ libvirt.name }}-disk1.qcow2 # noqa: name[template]
+      ansible.builtin.command:
+        cmd: qemu-img convert -O qcow2 /tmp/{{ vcsaprefix }}-disk1.vmdk /tmp/{{ libvirt.name }}-disk1.qcow2
+      changed_when: true
 
-  - name: Convert {{ vcsaprefix }}-disk2.vmdk to {{libvirt.name}}-disk2.qcow2
-    shell: qemu-img convert -O qcow2 /tmp/{{ vcsaprefix }}-disk2.vmdk /tmp/{{libvirt.name}}-disk2.qcow2
+    - name: Convert {{ vcsaprefix }}-disk2.vmdk to {{ libvirt.name }}-disk2.qcow2 # noqa: name[template]
+      ansible.builtin.command:
+        cmd: qemu-img convert -O qcow2 /tmp/{{ vcsaprefix }}-disk2.vmdk /tmp/{{ libvirt.name }}-disk2.qcow2
+      changed_when: true
 
-  - name: Convert {{ vcsaprefix }}-disk3.vmdk to {{libvirt.name}}-disk3.qcow2
-    shell: qemu-img convert -O qcow2 /tmp/{{ vcsaprefix }}-disk3.vmdk /tmp/{{libvirt.name}}-disk3.qcow2
+    - name: Convert {{ vcsaprefix }}-disk3.vmdk to {{ libvirt.name }}-disk3.qcow2 # noqa: name[template]
+      ansible.builtin.command:
+        cmd: qemu-img convert -O qcow2 /tmp/{{ vcsaprefix }}-disk3.vmdk /tmp/{{ libvirt.name }}-disk3.qcow2
+      changed_when: true
 
-  - name: Destroy the existing VCSA VM
-    shell: virsh -c qemu:///system destroy {{libvirt.name}}
-    ignore_errors: true
-    tags: libvirt
+    - name: Destroy the existing VCSA VM
+      ansible.builtin.command:
+        cmd: virsh -c qemu:///system destroy {{ libvirt.name }}
+      failed_when: false
+      changed_when: true
+      tags: libvirt
 
-  - name: Undefine the existing VCSA VM
-    shell: virsh -c qemu:///system undefine {{libvirt.name}}
-    ignore_errors: true
-    tags: libvirt
+    - name: Undefine the existing VCSA VM
+      ansible.builtin.command:
+        cmd: virsh -c qemu:///system undefine {{ libvirt.name }}
+      changed_when: true
+      failed_when: false
+      tags: libvirt
 
-  - name: Delete any existing volumes for the VCSA VM in the storage pool
-    shell: virsh -c qemu:///system  vol-delete --pool {{libvirt.pool}} {{libvirt.name}}-disk{{item}}.qcow2
-    with_sequence: "count={{ lookup('ansible.builtin.dict', disks) | length }}"
-    ignore_errors: true
-    tags: libvirt
+    - name: Delete any existing volumes for the VCSA VM in the storage pool
+      ansible.builtin.command: virsh -c qemu:///system  vol-delete --pool {{ libvirt.pool }} {{ libvirt.name }}-disk{{ item }}.qcow2
+      with_sequence: "count={{ lookup('ansible.builtin.dict', disks) | length }}"
+      changed_when: true
+      failed_when: false
+      tags: libvirt
 
-  - name: Create empty disk images
-    shell: virsh -c qemu:///system vol-create-as {{libvirt.pool}} {{libvirt.name}}-{{item.key}}.qcow2 {{item.value}}M --format qcow2
-    with_dict: '{{ disks }}'
-    tags: libvirt
+    - name: Create empty disk images
+      ansible.builtin.command: virsh -c qemu:///system vol-create-as {{ libvirt.pool }} {{ libvirt.name }}-{{ item.key }}.qcow2 {{ item.value }}M --format qcow2
+      with_dict: "{{ disks }}"
+      changed_when: true
+      tags: libvirt
 
-  - name: Import disk1 into the {{libvirt.pool}} pool
-    shell: virsh -c qemu:///system  vol-upload --pool {{libvirt.pool}} {{libvirt.name}}-disk1.qcow2 /tmp/{{libvirt.name}}-disk1.qcow2
-    tags: libvirt
+    - name: Import disk1 into the pool {{ libvirt.pool }}
+      ansible.builtin.command: virsh -c qemu:///system  vol-upload --pool {{ libvirt.pool }} {{ libvirt.name }}-disk1.qcow2 /tmp/{{ libvirt.name }}-disk1.qcow2
+      changed_when: true
+      tags: libvirt
 
-  - name: Import disk2 into the {{libvirt.pool}} pool
-    shell: virsh -c qemu:///system  vol-upload --pool {{libvirt.pool}} {{libvirt.name}}-disk2.qcow2 /tmp/{{libvirt.name}}-disk2.qcow2
-    tags: libvirt
+    - name: Import disk2 into the pool {{ libvirt.pool }}
+      ansible.builtin.command: virsh -c qemu:///system  vol-upload --pool {{ libvirt.pool }} {{ libvirt.name }}-disk2.qcow2 /tmp/{{ libvirt.name }}-disk2.qcow2
+      changed_when: true
+      tags: libvirt
 
-  - name: Import disk3 into the {{libvirt.pool}} pool
-    shell: virsh -c qemu:///system  vol-upload --pool {{libvirt.pool}} {{libvirt.name}}-disk3.qcow2 /tmp/{{libvirt.name}}-disk3.qcow2
-    tags: libvirt
+    - name: Import disk3 into the pool {{ libvirt.pool }}
+      ansible.builtin.command: virsh -c qemu:///system  vol-upload --pool {{ libvirt.pool }} {{ libvirt.name }}-disk3.qcow2 /tmp/{{ libvirt.name }}-disk3.qcow2
+      changed_when: true
+      tags: libvirt
 
-  - name: Create the VCSA VM
-    shell: virt-install --connect qemu:///system -n {{libvirt.name}} --ram 20480 --vcpus 8 --cpu host-passthrough --import --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk1.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk2.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk3.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk4.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk5.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk6.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk7.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk8.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk9.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk10.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk11.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk12.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk13.qcow2,bus=sata  --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk14.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk15.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk16.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk17.qcow2,bus=sata --os-variant linux2022 --network model=e1000e,{{libvirt.network_type}}={{libvirt.network_name}},mac={{ macaddr }} --wait 0
-    # shell: virt-install --connect qemu:///system -n {{libvirt.name}} --ram 24576 --vcpus 10 --cpu host-passthrough --import --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk1.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk2.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk3.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk4.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk5.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk6.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk7.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk8.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk9.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk10.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk11.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk12.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk13.qcow2,bus=sata  --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk14.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk15.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk16.qcow2,bus=sata --disk vol={{libvirt.pool}}/{{libvirt.name}}-disk17.qcow2,bus=sata --os-variant linux2022 --network model=e1000e,{{libvirt.network_type}}={{libvirt.network_name}},mac={{ macaddr }} --wait 0
-    tags: libvirt
+    - name: Create the VCSA VM
+      ansible.builtin.command: virt-install --connect qemu:///system -n {{ libvirt.name }} --ram 20480 --vcpus 8 --cpu host-passthrough --import --disk
+        vol={{ libvirt.pool }}/{{ libvirt.name }}-disk1.qcow2,bus=sata --disk vol={{ libvirt.pool }}/{{ libvirt.name }}-disk2.qcow2,bus=sata --disk
+        vol={{ libvirt.pool }}/{{ libvirt.name }}-disk3.qcow2,bus=sata --disk vol={{ libvirt.pool }}/{{ libvirt.name }}-disk4.qcow2,bus=sata --disk
+        vol={{ libvirt.pool }}/{{ libvirt.name }}-disk5.qcow2,bus=sata --disk vol={{ libvirt.pool }}/{{ libvirt.name }}-disk6.qcow2,bus=sata --disk
+        vol={{ libvirt.pool }}/{{ libvirt.name }}-disk7.qcow2,bus=sata --disk vol={{ libvirt.pool }}/{{ libvirt.name }}-disk8.qcow2,bus=sata --disk
+        vol={{ libvirt.pool }}/{{ libvirt.name }}-disk9.qcow2,bus=sata --disk vol={{ libvirt.pool }}/{{ libvirt.name }}-disk10.qcow2,bus=sata --disk
+        vol={{ libvirt.pool }}/{{ libvirt.name }}-disk11.qcow2,bus=sata --disk vol={{ libvirt.pool }}/{{ libvirt.name }}-disk12.qcow2,bus=sata --disk
+        vol={{ libvirt.pool }}/{{ libvirt.name }}-disk13.qcow2,bus=sata  --disk vol={{ libvirt.pool }}/{{ libvirt.name }}-disk14.qcow2,bus=sata --disk
+        vol={{ libvirt.pool }}/{{ libvirt.name }}-disk15.qcow2,bus=sata --disk vol={{ libvirt.pool }}/{{ libvirt.name }}-disk16.qcow2,bus=sata --disk
+        vol={{ libvirt.pool }}/{{ libvirt.name }}-disk17.qcow2,bus=sata --os-variant linux2022 --network
+        model=e1000e,{{ libvirt.network_type }}={{ libvirt.network_name }},mac={{ macaddr }} --wait 0
+      changed_when: true
+      tags: libvirt
