@@ -40,3 +40,5 @@ Sort of cleaned it up just ever so slightly.  At least it's a touch easier to re
 Failed firstboot install with 16 GB RAM.  Switched to 24 GB and it worked.  Thinking 20 GB might be enough.
 
 I was not able to get the vCLS VM to run nested.  I disabled it following https://kb.vmware.com/s/article/91890.
+
+Moved to https://knowledge.broadcom.com/external/article?legacyId=91890.
