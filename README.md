@@ -11,7 +11,7 @@ I have since updated to use 6.7 borrowing some efforts from Dr-Shadow's fork.
 
 Note that it can take a while for the appliance to come up to the blue screen where you can do the initial configuration.  After it comes up, it may still be installing packages.  If you configure the management network and disable IPv6, it will reboot the host potentially halting the install in the background.  If this happens the Administrator UI will say installing RPMs indefinitely.
 
-You may want to enable ssh and shell and login and check the contents of /var/log/firstboot/rpmInstall.json before proceeding (assuming you have DHCP running and/or IPv6 operational).  Speaking of DHCP it seems like the initial install will fail if DHCP isn't available.  Also, the console will show localhost for a while even after it's requested a DHCP address, after a while the DHCP address should get displayed.
+You may want to enable ssh and shell and login and check the contents of `/var/log/firstboot/rpmInstall.json` before proceeding (assuming you have DHCP running and/or IPv6 operational).  Speaking of DHCP it seems like the initial install will fail if DHCP isn't available.  Also, the console will show localhost for a while even after it's requested a DHCP address, after a while the DHCP address should get displayed.
 
 Note also that valid reverse DNS is supposed to be important when configuring the management network for the appliance.
 
@@ -42,3 +42,10 @@ Failed firstboot install with 16 GB RAM.  Switched to 24 GB and it worked.  Late
 I was not able to get the vCLS VM to run nested.  I disabled it following https://kb.vmware.com/s/article/91890.
 
 Moved to https://knowledge.broadcom.com/external/article?legacyId=91890.
+
+
+UPDATE:
+
+August 2025
+
+I got the initial install to work with DHCP for the IP but manual DNS and hostname.  However, not having reverse DNS seems to break the login screen.

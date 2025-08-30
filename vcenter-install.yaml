@@ -18,9 +18,11 @@
       - qemu-img
       - virt-install
       - python3-libselinux
-    vcsaiso: "VMware-VCSA-all-8.0.2-22617221.iso"
+    # vcsaiso: "VMware-VCSA-all-8.0.2-22617221.iso"
+    vcsaiso: "VMware-VCSA-all-8.0.2-23319993.iso"
     vcsapath: "/home/jcutter/media/"
-    vcsaprefix: "VMware-vCenter-Server-Appliance-8.0.2.00100-22617221_OVF10"
+    # vcsaprefix: "VMware-vCenter-Server-Appliance-8.0.2.00100-22617221_OVF10"
+    vcsaprefix: "VMware-vCenter-Server-Appliance-8.0.2.00200-23319993_OVF10"
     libvirt:
       name: "vcenter01"
       pool: "default"
